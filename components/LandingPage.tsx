@@ -16,7 +16,8 @@ export async function LandingPage() {
 console.log('handleSelect');
 redirect('dashboard')
 return;  }
-
+console.log(session?.user )
+console.log(typeof session == 'object' && session?.user !=null )
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white">
       <div className="container mx-auto px-4 py-16">
@@ -88,7 +89,7 @@ return;  }
               buttonText="Select Free Plan"
               onSelect={handleSelect}
                 highlighted
-                isLogedIn = { typeof session == 'object' && session.user !=null}
+                isLogedIn = { typeof session == 'object' && session?.user !=null}
               
             />
             <PricingCard
@@ -104,6 +105,8 @@ return;  }
               buttonText="Select Premium Plan"
               onSelect={handleSelect}
               highlighted
+              isLogedIn = { typeof session == 'object' && session?.user !=null}
+
             />
           </div>
         </CardContent>

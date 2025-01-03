@@ -49,7 +49,7 @@ export function PricingCard({
               <Button asChild className="text-lg px-8 py-4 bg-blue-600 hover:bg-blue-700">
               { isLogedIn ?  <Link className="w-full" href="/dashboard">
         {buttonText}
-            </Link>:      <Link className="w-full" href="/onboarding">
+            </Link>:      <Link className="w-full" href="/api/auth/login">
             {buttonText}
             </Link>}
             </Button>

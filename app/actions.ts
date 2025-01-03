@@ -87,16 +87,16 @@ console.log('Test2')
     //     ),
     //   },
     // })
-    const response = await fetch(process.env.BASE_URL+'/app/api/save-user-data', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ...data,
-        userId:data.id
-      }),
-    }); 
+    // const response = await fetch(process.env.BASE_URL+'/app/api/save-user-data', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     ...data,
+    //     userId:data.id
+    //   }),
+    // }); 
   }catch (error) {}
 
 console.log('session')
@@ -117,14 +117,17 @@ console.log('session')
       // }); 
       // console.log('sendok')
       console.log('put')
+      const {logo, ...dataWithoutImage} = data
+      data.logo=''
+      console.log(`${session.user.sub}||${dataWithoutImage.companyRegistrationNumber}`)
 
         await dynamoDb.put({
           TableName: process.env.DYNAMODB_TABLE_NAME!,
           Item: {
             id: session.user.sub,
             pk: session.user.sub,
-            sk: session.user.sub,
-            ...data,
+            sk: `${session.user.sub}||${dataWithoutImage.companyRegistrationNumber}`,
+            ...dataWithoutImage,
             openingHours: Object.fromEntries(
               Object.entries(data.openingHours).filter(([_, value]) => value !== null)
             ),

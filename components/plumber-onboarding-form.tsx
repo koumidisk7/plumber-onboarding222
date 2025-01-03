@@ -7,13 +7,13 @@ import { Textarea } from "../components/ui/textarea"
 import { Label } from "../components/ui/label"
 import { Card, CardContent } from "../components/ui/card"
 import { Switch } from "../components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select"
+import { Checkbox } from "../components/ui/checkbox"
 import { submitPlumberOnboarding } from '../app/actions'
 import { OpeningHours } from './opening-hours'
 import { translations, Language } from '../utils/translations'
 import { useFormStore } from '../store/formStore'
 import { useRouter } from 'next/navigation'
-import { Checkbox } from "../components/ui/checkbox"
+
 function generateGUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0,
@@ -26,6 +26,7 @@ export default function PlumberOnboardingForm() {
   const [step, setStep] = useState(0)
   const { formData, updateFormData } = useFormStore()
   const router = useRouter()
+  const [image, setImage] = useState('')
 
   useEffect(() => {
     if (!formData.id) {
@@ -39,9 +40,9 @@ export default function PlumberOnboardingForm() {
   const t = translations[formData.language]
 
   const steps = [
-    <CompanyInfo key="company" {...formData} updateFields={updateFormData} t={t} />,
-    <SocialMedia key="social" {...formData} updateFields={updateFormData} t={t} />,
-    <OpeningHours key="hours" openingHours={formData.openingHours} updateFields={updateFormData} t={t} />,
+    <CompanyInfo key="company" {...formData} updateFields={updateFormData} t={t} setImage={setImage} />,
+    <ContactInfo key="contact" {...formData} updateFields={updateFormData} t={t} />,
+    <AddressAndHours key="address" {...formData} updateFields={updateFormData} t={t} />,
   ]
 
   const isLastStep = step === steps.length - 1
@@ -103,13 +104,14 @@ export default function PlumberOnboardingForm() {
 
 function CompanyInfo({
   companyName,
-  companyType,
+  companyRegistrationNumber,
   yearEstablished,
   description,
   logo,
   services,
   updateFields,
   t,
+  setImage
 }: ReturnType<typeof useFormStore>['formData'] & { updateFields: (fields: Partial<ReturnType<typeof useFormStore>['formData']>) => void, t: typeof translations.en }) {
   const [isDescriptionFocused, setIsDescriptionFocused] = useState(false);
   const [newService, setNewService] = useState('');
@@ -133,7 +135,8 @@ function CompanyInfo({
     const file = e.target.files?.[0];
     if (file) {
       const base64 = await convertToBase64(file);
-      updateFields({ logo: base64 });
+    //  updateFields({ logo: base64 });
+      setImage(base64);
     }
   };
 
@@ -159,21 +162,13 @@ function CompanyInfo({
         />
       </div>
       <div>
-        <Label htmlFor="companyType">{t.companyType}</Label>
-        <Select
-          value={companyType}
-          onValueChange={(value) => updateFields({ companyType: value })}
-        >
-          <SelectTrigger id="companyType">
-            <SelectValue placeholder={t.selectCompanyType} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="sole_proprietorship">{t.soleProprietorship}</SelectItem>
-            <SelectItem value="partnership">{t.partnership}</SelectItem>
-            <SelectItem value="corporation">{t.corporation}</SelectItem>
-            <SelectItem value="llc">{t.llc}</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label htmlFor="companyRegistrationNumber">{t.companyRegistrationNumber}</Label>
+        <Input
+          id="companyRegistrationNumber"
+          value={companyRegistrationNumber}
+          onChange={e => updateFields({ companyRegistrationNumber: e.target.value })}
+          required
+        />
       </div>
       <div>
         <Label htmlFor="yearEstablished">{t.yearEstablished}</Label>
@@ -248,16 +243,44 @@ function CompanyInfo({
   )
 }
 
-function SocialMedia({
+function ContactInfo({
   facebook,
   twitter,
   instagram,
+  telephoneNumber,
+  hasViber,
+  hasWhatsApp,
   updateFields,
   t,
 }: ReturnType<typeof useFormStore>['formData'] & { updateFields: (fields: Partial<ReturnType<typeof useFormStore>['formData']>) => void, t: typeof translations.en }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">{t.socialMedia}</h2>
+      <h2 className="text-xl font-semibold">{t.contactInfo}</h2>
+      <div>
+        <Label htmlFor="telephoneNumber">{t.telephoneNumber}</Label>
+        <Input
+          id="telephoneNumber"
+          value={telephoneNumber}
+          onChange={e => updateFields({ telephoneNumber: e.target.value })}
+          required
+        />
+      </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="hasViber"
+          checked={hasViber}
+          onCheckedChange={(checked) => updateFields({ hasViber: checked as boolean })}
+        />
+        <Label htmlFor="hasViber">{t.hasViber}</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="hasWhatsApp"
+          checked={hasWhatsApp}
+          onCheckedChange={(checked) => updateFields({ hasWhatsApp: checked as boolean })}
+        />
+        <Label htmlFor="hasWhatsApp">{t.hasWhatsApp}</Label>
+      </div>
       <div>
         <Label htmlFor="facebook">{t.facebook}</Label>
         <Input
@@ -282,6 +305,29 @@ function SocialMedia({
           onChange={e => updateFields({ instagram: e.target.value })}
         />
       </div>
+    </div>
+  )
+}
+
+function AddressAndHours({
+  address,
+  openingHours,
+  updateFields,
+  t,
+}: ReturnType<typeof useFormStore>['formData'] & { updateFields: (fields: Partial<ReturnType<typeof useFormStore>['formData']>) => void, t: typeof translations.en }) {
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold">{t.addressAndHours}</h2>
+      <div>
+        <Label htmlFor="address">{t.address}</Label>
+        <Textarea
+          id="address"
+          value={address}
+          onChange={e => updateFields({ address: e.target.value })}
+          required
+        />
+      </div>
+      <OpeningHours openingHours={openingHours} updateFields={updateFields} t={t} />
     </div>
   )
 }
