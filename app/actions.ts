@@ -42,7 +42,7 @@ export async function submitPlumberOnboarding(data: FormData) {
   }
 console.log('Test2')
   // Save user data to DynamoDB
-  */
+
   const response = await fetch(process.env.BASE_URL+'/app/api/save-user-data', {
     method: 'POST',
     headers: {
@@ -52,7 +52,7 @@ console.log('Test2')
       userId: session.user.sub,
       ...data,
     }),
-  });
+  });  */
 /*
   if (!response.ok) {
     throw new Error('Failed to save user data');

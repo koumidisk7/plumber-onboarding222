@@ -1,26 +1,26 @@
-import PlumberOnboardingForm from '../components/plumber-onboarding-form'
+import { LandingPage } from '../components/LandingPage'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Plumber Onboarding | Your Company Name',
-  description: 'Easy onboarding process for professional plumbers. Join our network and grow your business.',
-  keywords: 'plumber, onboarding, professional services, plumbing business',
+  title: 'Plumber Digital Presence | Your Company Name',
+  description: 'Boost your plumbing business with a strong digital presence. Join our network and grow your business online.',
+  keywords: 'plumber, digital presence, online business, plumbing services',
   openGraph: {
-    title: 'Plumber Onboarding | Your Company Name',
-    description: 'Easy onboarding process for professional plumbers. Join our network and grow your business.',
+    title: 'Plumber Digital Presence | Your Company Name',
+    description: 'Boost your plumbing business with a strong digital presence. Join our network and grow your business online.',
     images: [
       {
         url: 'https://example.com/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Plumber Onboarding',
+        alt: 'Plumber Digital Presence',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Plumber Onboarding | Your Company Name',
-    description: 'Easy onboarding process for professional plumbers. Join our network and grow your business.',
+    title: 'Plumber Digital Presence | Your Company Name',
+    description: 'Boost your plumbing business with a strong digital presence. Join our network and grow your business online.',
     images: ['https://example.com/twitter-image.jpg'],
   },
 }
@@ -34,8 +34,8 @@ export default function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": "Plumber Onboarding",
-            "description": "Easy onboarding process for professional plumbers. Join our network and grow your business.",
+            "name": "Plumber Digital Presence",
+            "description": "Boost your plumbing business with a strong digital presence. Join our network and grow your business online.",
             "provider": {
               "@type": "Organization",
               "name": "Your Company Name",
@@ -44,9 +44,8 @@ export default function Home() {
           })
         }}
       />
-      <main className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold text-center mb-8">Plumber Onboarding</h1>
-        <PlumberOnboardingForm />
+      <main>
+        <LandingPage />
       </main>
     </>
   )
