@@ -4,7 +4,10 @@ import { Language } from '../utils/translations'
 import { auth0 } from '../utils/auth0'
 import { redirect } from 'next/navigation'
 
+import { DynamoDB } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 type FormData = {
+  id: string;
   companyName: string
   companyType: string
   yearEstablished: string
@@ -19,7 +22,13 @@ type FormData = {
   };
   language: Language;
 }
-
+const dynamoDb = DynamoDBDocument.from(new DynamoDB({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+}));
 export async function submitPlumberOnboarding(data: FormData) {
   console.log('Plumber onboarding data:', {
     ...data,
@@ -60,6 +69,79 @@ console.log('Test2')
 
   // Redirect to dashboard
   redirect('/dashboard');*/
-  redirect('../unauthorized');
+  try {
+    // await dynamoDb.put({
+    //   TableName: process.env.DYNAMODB_TABLE_NAME!,
+    //   Item: {
+    //     id: data.id,
+    //     userId,
+    //     ...data,
+    //     openingHours: Object.fromEntries(
+    //       Object.entries(data.openingHours).filter(([_, value]) => value !== null)
+    //     ),
+    //   },
+    // })
+    const response = await fetch(process.env.BASE_URL+'/app/api/save-user-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...data,
+        userId:data.id
+      }),
+    }); 
+  }catch (error) {}
+
+console.log('session')
+  if (session) {
+    console.log(session.user.sub)
+    try {
+     
+      // const response = await fetch(process.env.BASE_URL+'/app/api/save-user-data', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     ...data,
+      //     pk:session.user.sub,
+      //     id:session.user.sub
+      //   }),
+      // }); 
+      // console.log('sendok')
+      console.log('put')
+
+        await dynamoDb.put({
+          TableName: process.env.DYNAMODB_TABLE_NAME!,
+          Item: {
+            id: session.user.sub,
+            pk: session.user.sub,
+            sk: session.user.sub,
+            ...data,
+            openingHours: Object.fromEntries(
+              Object.entries(data.openingHours).filter(([_, value]) => value !== null)
+            ),
+          },
+        })
+        console.log('put2')
+
+        console.log('sendok2')
+
+    const result = await dynamoDb.get({
+      TableName: process.env.DYNAMODB_TABLE_NAME!,
+      Key: {
+        pk: session.user.sub,
+        sk: session.user.sub,
+      },
+    });
+console.log(result)
+    }catch (error) {
+      console.log('error')
+      console.log(error)
+
+    }
+  }
+  redirect('../dashboard');
 }
 

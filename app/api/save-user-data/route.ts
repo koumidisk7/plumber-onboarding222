@@ -16,7 +16,8 @@ export async function POST(request: Request) {
     await dynamoDb.put({
       TableName: process.env.DYNAMODB_TABLE_NAME!,
       Item: {
-        userId: userData.userId,
+        pk: userData.Id,
+        userId: userData.Id,
         ...userData,
       },
     });

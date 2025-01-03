@@ -1,6 +1,14 @@
 import Link from 'next/link'
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+import { auth0 } from '../../utils/auth0'
+import React, { useEffect } from 'react'
+
+
+//   useEffect(() => {
+//     const session = await auth0.getSession();
+
+// }, [])
 
 export default function AuthorizedPage() {
   return (

@@ -1,6 +1,8 @@
 import { Button } from "./ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Check } from 'lucide-react'
+import { ArrowRight, Globe, Clock, DollarSign, Star } from 'lucide-react'
+import Link from 'next/link'
 
 interface PricingCardProps {
   title: string
@@ -10,6 +12,7 @@ interface PricingCardProps {
   buttonText: string
   onSelect: () => void
   highlighted?: boolean
+  isLogedIn?: boolean
 }
 
 export function PricingCard({
@@ -20,6 +23,7 @@ export function PricingCard({
   buttonText,
   onSelect,
   highlighted = false,
+  isLogedIn = false,
 }: PricingCardProps) {
   return (
     <Card className={`w-full max-w-sm ${highlighted ? 'border-blue-500 border-2' : ''}`}>
@@ -39,9 +43,16 @@ export function PricingCard({
         </ul>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" onClick={onSelect}>
+        {/* <Button className="w-full" onClick={onSelect}>
           {buttonText}
-        </Button>
+        </Button> */}
+              <Button asChild className="text-lg px-8 py-4 bg-blue-600 hover:bg-blue-700">
+              { isLogedIn ?  <Link className="w-full" href="/dashboard">
+        {buttonText}
+            </Link>:      <Link className="w-full" href="/onboarding">
+            {buttonText}
+            </Link>}
+            </Button>
       </CardFooter>
     </Card>
   )

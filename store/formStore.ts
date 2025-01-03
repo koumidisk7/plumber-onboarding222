@@ -6,26 +6,28 @@ type OpeningHours = {
 }
 
 type FormData = {
-  companyName: string
-  companyType: string
-  yearEstablished: string
-  description: string
-  logo?: string
-  services: string[]
-  facebook: string
-  twitter: string
-  instagram: string
-  openingHours: OpeningHours
-  language: Language
+  id: string;
+  companyName: string;
+  companyType: string;
+  yearEstablished: string;
+  description: string;
+  logo?: string;
+  services: string[];
+  facebook: string;
+  twitter: string;
+  instagram: string;
+  openingHours: OpeningHours;
+  language: Language;
 }
 
 type FormStore = {
-  formData: FormData
-  updateFormData: (data: Partial<FormData>) => void
-  resetFormData: () => void
+  formData: FormData;
+  updateFormData: (data: Partial<FormData>) => void;
+  resetFormData: () => void;
 }
 
 const INITIAL_DATA: FormData = {
+  id: '',
   companyName: '',
   companyType: '',
   yearEstablished: '',
@@ -45,7 +47,7 @@ const INITIAL_DATA: FormData = {
   language: 'en',
 }
 
-export const useFormStore = create<FormStore>((set)  : FormStore=> ({
+export const useFormStore = create<FormStore>((set) => ({
   formData: INITIAL_DATA,
   updateFormData: (data) => set((state) => ({ formData: { ...state.formData, ...data } })),
   resetFormData: () => set({ formData: INITIAL_DATA }),

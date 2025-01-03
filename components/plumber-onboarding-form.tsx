@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Textarea } from "../components/ui/textarea"
@@ -12,10 +12,26 @@ import { submitPlumberOnboarding } from '../app/actions'
 import { OpeningHours } from './opening-hours'
 import { translations, Language } from '../utils/translations'
 import { useFormStore } from '../store/formStore'
+import { useRouter } from 'next/navigation'
+
+function generateGUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0,
+        v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
 export default function PlumberOnboardingForm() {
   const [step, setStep] = useState(0)
   const { formData, updateFormData } = useFormStore()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!formData.id) {
+      updateFormData({ id: generateGUID() })
+    }
+  }, [formData.id, updateFormData])
 
   const nextStep = () => setStep(s => s + 1)
   const prevStep = () => setStep(s => s - 1)
@@ -35,7 +51,12 @@ export default function PlumberOnboardingForm() {
     if (!isLastStep) {
       return nextStep()
     }
-    await submitPlumberOnboarding(formData)
+    try {
+      await submitPlumberOnboarding(formData)
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      // Handle error (e.g., show error message to user)
+    }
   }
 
   return (
@@ -89,7 +110,7 @@ function CompanyInfo({
   services,
   updateFields,
   t,
-}: ReturnType<typeof useFormStore>['formData'] & { updateFields: (fields: Partial<ReturnType<typeof useFormStore> ['formData']>) => void, t: typeof translations.en }) {
+}: ReturnType<typeof useFormStore>['formData'] & { updateFields: (fields: Partial<ReturnType<typeof useFormStore>['formData']>) => void, t: typeof translations.en }) {
   const [isDescriptionFocused, setIsDescriptionFocused] = useState(false);
   const [newService, setNewService] = useState('');
 
