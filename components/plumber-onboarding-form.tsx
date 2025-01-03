@@ -13,7 +13,7 @@ import { OpeningHours } from './opening-hours'
 import { translations, Language } from '../utils/translations'
 import { useFormStore } from '../store/formStore'
 import { useRouter } from 'next/navigation'
-
+import { Checkbox } from "../components/ui/checkbox"
 function generateGUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0,

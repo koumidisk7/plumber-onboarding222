@@ -6,22 +6,28 @@ import { redirect } from 'next/navigation'
 
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+
 type FormData = {
   id: string;
-  companyName: string
-  companyType: string
-  yearEstablished: string
-  description: string
-  logo?: string
-  services: string[]
-  facebook: string
-  twitter: string
-  instagram: string
+  companyName: string;
+  companyRegistrationNumber: string;
+  yearEstablished: string;
+  description: string;
+  logo: string;
+  services: string[];
+  facebook: string;
+  twitter: string;
+  instagram: string;
+  telephoneNumber: string;
+  hasViber: boolean;
+  hasWhatsApp: boolean;
+  address: string;
   openingHours: {
     [key: string]: { open: string; close: string } | null;
   };
   language: Language;
 }
+
 const dynamoDb = DynamoDBDocument.from(new DynamoDB({
   region: process.env.AWS_REGION,
   credentials: {

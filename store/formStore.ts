@@ -8,7 +8,7 @@ type OpeningHours = {
 type FormData = {
   id: string;
   companyName: string;
-  companyType: string;
+  companyRegistrationNumber: string;
   yearEstablished: string;
   description: string;
   logo?: string;
@@ -16,6 +16,10 @@ type FormData = {
   facebook: string;
   twitter: string;
   instagram: string;
+  telephoneNumber: string;
+  hasViber: boolean;
+  hasWhatsApp: boolean;
+  address: string;
   openingHours: OpeningHours;
   language: Language;
 }
@@ -29,7 +33,7 @@ type FormStore = {
 const INITIAL_DATA: FormData = {
   id: '',
   companyName: '',
-  companyType: '',
+  companyRegistrationNumber: '',
   yearEstablished: '',
   description: '',
   logo: undefined,
@@ -37,6 +41,10 @@ const INITIAL_DATA: FormData = {
   facebook: '',
   twitter: '',
   instagram: '',
+  telephoneNumber: '',
+  hasViber: false,
+  hasWhatsApp: false,
+  address: '',
   openingHours: {
     monday: null,
     tuesday: null,
