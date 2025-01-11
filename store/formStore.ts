@@ -5,7 +5,7 @@ type OpeningHours = {
   [key: string]: { open: string; close: string } | null;
 }
 
-type FormData = {
+export type FormData2 = {
   id: string;
   companyName: string;
   companyRegistrationNumber: string;
@@ -25,12 +25,13 @@ type FormData = {
 }
 
 type FormStore = {
-  formData: FormData;
-  updateFormData: (data: Partial<FormData>) => void;
+  formData: FormData2;
+  updateFormData: (data: Partial<FormData2>) => void;
   resetFormData: () => void;
+  setAllFormData: (data: FormData2) => void;
 }
 
-const INITIAL_DATA: FormData = {
+export const  INITIAL_DATA: FormData2 = {
   id: '',
   companyName: '',
   companyRegistrationNumber: '',
@@ -59,5 +60,6 @@ export const useFormStore = create<FormStore>((set) => ({
   formData: INITIAL_DATA,
   updateFormData: (data) => set((state) => ({ formData: { ...state.formData, ...data } })),
   resetFormData: () => set({ formData: INITIAL_DATA }),
+  setAllFormData: (data) => set({ formData: data }),
 }))
 

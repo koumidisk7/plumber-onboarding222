@@ -22,17 +22,48 @@ function generateGUID() {
   });
 }
 
-export default function PlumberOnboardingForm() {
+export default function PlumberOnboardingForm({companyData}) {
   const [step, setStep] = useState(0)
-  const { formData, updateFormData } = useFormStore()
+  const { formData, updateFormData, setAllFormData } = useFormStore()
   const router = useRouter()
   const [image, setImage] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  // useEffect(() => {
+  //   if (!formData.id) {
+  //     updateFormData({ id: generateGUID() })
+  //   }
+  // }, [formData.id, updateFormData])
+
+  console.log(companyData)
 
   useEffect(() => {
-    if (!formData.id) {
-      updateFormData({ id: generateGUID() })
+    // const fetchCompanyData = async () => {
+    //   try {
+    //     const response = await fetch(`/api/company-data?id=${formData.id}`);
+    //     if (!response.ok) {
+    //       throw new Error('Failed to fetch company data');
+    //     }
+    //     const data = await response.json();
+    //     setAllFormData(data);
+    //   } catch (error) {
+    //     console.error('Error fetching company data:', error);
+    //     setError('Failed to load company data. Please try again later.');
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
+    console.log(companyData)
+
+    if (companyData) {
+      console.log('companyData')
+      setAllFormData(companyData);
+      setIsLoading(false);
+    } else {
+      updateFormData({ id: generateGUID() });
+      setIsLoading(false);
     }
-  }, [formData.id, updateFormData])
+  }, [ companyData, updateFormData]);
 
   const nextStep = () => setStep(s => s + 1)
   const prevStep = () => setStep(s => s - 1)
@@ -54,10 +85,21 @@ export default function PlumberOnboardingForm() {
     }
     try {
       await submitPlumberOnboarding(formData)
+      router.push('../design')
     } catch (error) {
       console.error('Error submitting form:', error)
       // Handle error (e.g., show error message to user)
+      setError('Failed to submit form. Please try again later.');
     }
+  }
+
+  
+  if (isLoading) {
+    return <div className="text-center mt-8">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-8 text-red-500">{error}</div>;
   }
 
   return (
@@ -135,7 +177,7 @@ function CompanyInfo({
     const file = e.target.files?.[0];
     if (file) {
       const base64 = await convertToBase64(file);
-    //  updateFields({ logo: base64 });
+      updateFields({ logo: base64 });
       setImage(base64);
     }
   };

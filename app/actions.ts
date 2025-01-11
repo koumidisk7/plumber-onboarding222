@@ -6,14 +6,14 @@ import { redirect } from 'next/navigation'
 
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
-
+import { useSession, signIn, signOut } from "next-auth/react"
 type FormData = {
   id: string;
   companyName: string;
   companyRegistrationNumber: string;
   yearEstablished: string;
   description: string;
-  logo: string;
+  logo?: string;
   services: string[];
   facebook: string;
   twitter: string;
@@ -120,7 +120,15 @@ console.log('session')
       const {logo, ...dataWithoutImage} = data
       data.logo=''
       console.log(`${session.user.sub}||${dataWithoutImage.companyRegistrationNumber}`)
-
+      await dynamoDb.put({
+        TableName: process.env.DYNAMODB_TABLE_NAME!,
+        Item: {
+          id: session.user.sub,
+          pk: `${session.user.sub}||${dataWithoutImage.companyRegistrationNumber}||image`,
+          sk: `${session.user.sub}||${dataWithoutImage.companyRegistrationNumber}||image`,
+          logo,
+        },
+      })
         await dynamoDb.put({
           TableName: process.env.DYNAMODB_TABLE_NAME!,
           Item: {
@@ -151,6 +159,6 @@ console.log(result)
 
     }
   }
-  redirect('../dashboard');
+ // redirect('../dashboard');
 }
 

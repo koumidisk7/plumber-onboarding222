@@ -1,4 +1,3 @@
-'use client'
 import { redirect } from 'next/navigation';
 import { Button } from "./ui/button"
 import { useRouter } from 'next/navigation'
@@ -9,7 +8,6 @@ import { PricingCard } from '../components/PricingCard'
 import { getSession } from '@auth0/nextjs-auth0';
 
 export async function LandingPage() {
-  const router = useRouter()
   const session = await getSession();
 
   const handleSelect = () => {
@@ -87,7 +85,7 @@ console.log(typeof session == 'object' && session?.user !=null )
                 "Limited customer reach"
               ]}
               buttonText="Select Free Plan"
-              onSelect={handleSelect}
+              // onSelect={handleSelect}
                 highlighted
                 isLogedIn = { typeof session == 'object' && session?.user !=null}
               
@@ -103,7 +101,7 @@ console.log(typeof session == 'object' && session?.user !=null )
                 "Priority support"
               ]}
               buttonText="Select Premium Plan"
-              onSelect={handleSelect}
+              // onSelect={handleSelect}
               highlighted
               isLogedIn = { typeof session == 'object' && session?.user !=null}
 

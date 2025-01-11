@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 interface DashBoardClientProps {
   mockUserData: CompanyData[];
 }
-export default async function DashBoardClient({mockUserData}:DashBoardClientProps) {
+export default  function DashBoardClient({mockUserData}:DashBoardClientProps) {
 
 console.log(mockUserData)
 const router = useRouter()
@@ -24,10 +24,13 @@ const createQueryString = (name, value) => {
     //   description: `Opening editor for company ${companyId}`,
     // });
     console.log('here!!'+companyRegistrationNumber)
-    router.push(
-       './onboarding'+ "?" + createQueryString("companyRegistrationNumber",companyRegistrationNumber)
-      )
-    //     redirect(`../onboarding?${companyRegistrationNumber}`);
+    // router.push(
+    //    './onboarding'+ "?" + createQueryString("companyRegistrationNumber",companyRegistrationNumber)
+    //   )
+      router.push(
+        './onboarding'+ "/" + companyRegistrationNumber
+       )
+        // redirect(`../onboarding?${companyRegistrationNumber}`);
   };
 
   const handleEditDesign = (companyId: string) => {

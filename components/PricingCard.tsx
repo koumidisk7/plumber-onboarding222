@@ -1,8 +1,10 @@
+// 'use client'
 import { Button } from "./ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Check } from 'lucide-react'
 import { ArrowRight, Globe, Clock, DollarSign, Star } from 'lucide-react'
 import Link from 'next/link'
+import { signIn } from 'next-auth/react'
 
 interface PricingCardProps {
   title: string
@@ -10,7 +12,7 @@ interface PricingCardProps {
   description: string
   features: string[]
   buttonText: string
-  onSelect: () => void
+ // onSelect: () => void
   highlighted?: boolean
   isLogedIn?: boolean
 }
@@ -21,7 +23,7 @@ export function PricingCard({
   description,
   features,
   buttonText,
-  onSelect,
+ // onSelect,
   highlighted = false,
   isLogedIn = false,
 }: PricingCardProps) {
@@ -47,11 +49,21 @@ export function PricingCard({
           {buttonText}
         </Button> */}
               <Button asChild className="text-lg px-8 py-4 bg-blue-600 hover:bg-blue-700">
-              { isLogedIn ?  <Link className="w-full" href="/dashboard">
+              { isLogedIn ?  
+                //    <Button className="w-full" onClick={()=>signIn("auth0")}>
+                //    {buttonText}
+                //  </Button>
+              <Link className="w-full" href="/dashboard">
         {buttonText}
-            </Link>:      <Link className="w-full" href="/api/auth/login">
+            </Link>
+            :      
+            <Link className="w-full" href="/api/auth/login" >
             {buttonText}
-            </Link>}
+            </Link>
+          //    <Button className="w-full" onClick={()=>signIn("auth0")}>
+          //    {buttonText}
+          //  </Button>
+            }
             </Button>
       </CardFooter>
     </Card>
