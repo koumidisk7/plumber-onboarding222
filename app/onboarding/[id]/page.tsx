@@ -37,7 +37,6 @@ export default async function OnboardingPageSpecific({ params }: { params: { id:
   res=null;
 
 if (params.id!=null&&session!=null){
-  console.log('Inn')
   const dynamoDb = DynamoDBDocument.from(new DynamoDB({
     region: process.env.AWS_REGION,
     credentials: {
@@ -94,7 +93,7 @@ if (params.id!=null&&session!=null){
   return (
     <main className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-8">Plumber Onboarding</h1>
-      <PlumberOnboardingForm companyData={res} />
+      <PlumberOnboardingForm companyData={res} isEdit={true} />
     </main>
   )
 }

@@ -3,6 +3,7 @@
 import { Language } from '../utils/translations'
 import { auth0 } from '../utils/auth0'
 import { redirect } from 'next/navigation'
+import { Resend } from 'resend';
 
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
@@ -129,7 +130,8 @@ console.log('session')
           logo,
         },
       })
-        await dynamoDb.put({
+
+      await dynamoDb.put({
           TableName: process.env.DYNAMODB_TABLE_NAME!,
           Item: {
             id: session.user.sub,
@@ -152,6 +154,38 @@ console.log('session')
         sk: session.user.sub,
       },
     });
+
+    const resulteMAIL = await dynamoDb.get({
+      TableName: process.env.DYNAMODB_TABLE_NAME!,
+      Key: {
+        pk: `${session.user.sub}||EMAIL_SENT`,
+        sk: `${session.user.sub}||EMAIL_SENT`,
+      },
+    });
+    console.log(resulteMAIL)
+if(resulteMAIL.Item){
+//skip sending email
+}
+else{
+
+  const resend = new Resend(process.env.RESEND_API_KEY!);
+  
+  resend.emails.send({
+    from: 'onboarding@resend.dev',
+    to: 'koumidisk7@gmail.com',
+    subject: 'Hello World!!---',
+    html: '<p>Congrats on sending your <strong>first email</strong>!</p>'
+  });
+  
+  await dynamoDb.put({
+    TableName: process.env.DYNAMODB_TABLE_NAME!,
+    Item: {
+      pk: `${session.user.sub}||EMAIL_SENT`,
+      sk: `${session.user.sub}||EMAIL_SENT`,
+    },
+  })
+}
+
 console.log(result)
     }catch (error) {
       console.log('error')

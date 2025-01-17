@@ -1,13 +1,17 @@
-import { UserProvider } from '@auth0/nextjs-auth0/client'
+//import { UserProvider } from '@auth0/nextjs-auth0/client'
 import './globals.css'
 import Link from 'next/link'
+import { AppDetails } from '../lib/conts'
+import { getSession } from '@auth0/nextjs-auth0';
 
 export const metadata = {
   title: 'Plumber Digital Presence',
   description: 'Boost your plumbing business with a strong digital presence',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
+  console.log(session)
   return (
     <html lang="en">
       <head>
@@ -15,20 +19,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="index, follow" />
       </head>
-      <UserProvider>
+      {/* <UserProvider> */}
         <body>
           <nav className="bg-blue-600 text-white p-4">
             <div className="container mx-auto flex justify-between items-center">
-              <Link href="/" className="text-2xl font-bold">PlumberBoost</Link>
+              <Link href="/" className="text-2xl font-bold">{AppDetails.name}</Link>
               <div>
-                <Link href="/onboarding" className="mr-4 hover:underline">Onboarding</Link>
-                <Link href="/api/auth/login" className="hover:underline">Login</Link>
+                {/* <Link href="/onboarding" className="mr-4 hover:underline">Onboarding</Link> */}
+               {(session)? <Link href="/api/auth/logout" className="hover:underline">Logout</Link>
+               :<Link href="/api/auth/login" className="hover:underline">Login</Link>}
               </div>
             </div>
           </nav>
           {children}
         </body>
-      </UserProvider>
+      {/* </UserProvider> */}
     </html>
   )
 }

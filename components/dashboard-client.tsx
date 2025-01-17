@@ -19,21 +19,19 @@ const createQueryString = (name, value) => {
   return params.toString();
 };
   const handleEditDetails = (companyRegistrationNumber: string) => {
-    // toast({
-    //   title: "Edit Details",
-    //   description: `Opening editor for company ${companyId}`,
-    // });
+
     console.log('here!!'+companyRegistrationNumber)
-    // router.push(
-    //    './onboarding'+ "?" + createQueryString("companyRegistrationNumber",companyRegistrationNumber)
-    //   )
+
       router.push(
-        './onboarding'+ "/" + companyRegistrationNumber
+        './onboarding'+ "/" + companyRegistrationNumber+"?"+createQueryString('edit','true')
        )
-        // redirect(`../onboarding?${companyRegistrationNumber}`);
   };
 
-  const handleEditDesign = (companyId: string) => {
+  const handleEditDesign = (companyRegistrationNumber: string) => {
+    
+    router.push(
+      './design'+ "/" + companyRegistrationNumber+"?"+createQueryString('edit','true')
+     )
     // toast({
     //   title: "Edit Design",
     //   description: `Opening design editor for company ${companyId}`,

@@ -93,8 +93,8 @@ export default async function DashboardPage() {
   
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Welcome to your Dashboard</h1>
+    <div >
+      {/* <h1 className="text-2xl font-bold mb-4">Welcome to your Dashboard</h1> */}
       <DashBoardClient mockUserData={companies} />
       {/* <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">

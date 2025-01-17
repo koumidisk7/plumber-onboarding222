@@ -22,7 +22,7 @@ function generateGUID() {
   });
 }
 
-export default function PlumberOnboardingForm({companyData}) {
+export default function PlumberOnboardingForm({companyData, isEdit=false}) {
   const [step, setStep] = useState(0)
   const { formData, updateFormData, setAllFormData } = useFormStore()
   const router = useRouter()
@@ -85,7 +85,10 @@ export default function PlumberOnboardingForm({companyData}) {
     }
     try {
       await submitPlumberOnboarding(formData)
-      router.push('../design')
+      if(isEdit)
+        router.push('../dashboard')
+      else
+        router.push('../design')
     } catch (error) {
       console.error('Error submitting form:', error)
       // Handle error (e.g., show error message to user)

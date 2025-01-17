@@ -1,39 +1,33 @@
 'use client'
 
-import { useState } from 'react'
-import { EditableText } from '../../components/editable-text'
-import { LayoutSuggestions } from '../../components/layout-suggestions'
-import { Button } from '../../components/ui/button'
-import { ColorPicker } from '../../components/color-picker'
-import { LogoUploader } from '../../components/logo-uploader'
-import { useFormStore } from '../../store/formStore'
-import { submitPlumberOnboarding } from '../actions'
-import router from 'next/router'
+import { useState, useCallback } from 'react'
+import { EditableText } from './editable-text'
+import { LayoutSuggestions } from './layout-suggestions'
+import { Button } from './ui/button'
+import { ColorPicker } from './color-picker'
+import { LogoUploader } from './logo-uploader'
+import { FormData2, useFormStore } from '../store/formStore'
+import { submitPlumberOnboarding } from '../app/actions'
 
-// Define an object to store CSS classes for EditableText components
-const editableTextClasses = {
-  companyName: "text-2xl font-bold",
-  navItem: "text-sm",
-  heroTitle: "text-4xl font-bold mb-4",
-  heroDescription: "text-xl mb-8",
-  heroButton: "text-white",
-  sectionTitle: "text-3xl font-bold mb-8 text-center",
-  serviceTitle: "text-xl font-semibold mb-4",
-  serviceDescription: "text-base",
-  aboutParagraph: "text-lg mb-4",
-  contactTitle: "text-3xl font-bold mb-8 text-center",
-  contactParagraph: "text-center mb-4",
-  contactInfo: "text-base",
-  footerText: "text-sm",
-};
-export default function Home() {
+import router from 'next/router'
+interface PageDesignerProps {
+    formData: FormData2;
+  }
+export default function Home({formData}:PageDesignerProps) {
   const [heroLayout, setHeroLayout] = useState('centered')
   const [servicesLayout, setServicesLayout] = useState('grid')
   const [aboutLayout, setAboutLayout] = useState('single-column')
   const [contactLayout, setContactLayout] = useState('centered')
   const [headerTextColor, setHeaderTextColor] = useState('#ffffff')
   const [headerLogo, setHeaderLogo] = useState<File | null>(null)
-  const { formData, updateFormData } = useFormStore()
+  const {  updateFormData } = useFormStore()
+
+  const [textStyles, setTextStyles] = useState<{ [key: string]: React.CSSProperties }>({});
+
+  const handleStyleChange = useCallback((id: string, style: React.CSSProperties) => {
+    setTextStyles((prev) => ({ ...prev, [id]: style }));
+  }, []);
+
   const heroLayouts = [
     { name: 'centered', description: 'Content centered on the page' },
     { name: 'left-aligned', description: 'Content aligned to the left' },
@@ -85,14 +79,16 @@ export default function Home() {
               <EditableText
                 initialText={formData.companyName}
                 className={`text-2xl font-bold`}
-                style={{ color: headerTextColor }}
+                style={textStyles['companyName'] || { color: headerTextColor }}
+                onStyleChange={(style) => handleStyleChange('companyName', style)}
                 fieldName='companyName'
               />
             ) : (
               <EditableText
                 initialText={formData.companyName}
                 className={`text-2xl font-bold`}
-                style={{ color: headerTextColor }}
+                style={textStyles['companyName'] || { color: headerTextColor }}
+                onStyleChange={(style) => handleStyleChange('companyName', style)}
                 fieldName='companyName'
               />
             )}
@@ -120,13 +116,17 @@ export default function Home() {
             <div className="flex flex-col md:flex-row items-center">
               <div className="md:w-1/2 mb-8 md:mb-0">
                 <h1 className="text-4xl font-bold mb-4">
-                  <EditableText initialText={formData.companyName}     onChange={() => updateFormData({ companyName: e.target.value })} />
+                  <EditableText initialText={formData.companyName}   
+                    onChange={() => updateFormData({ companyName: e.target.value })}
+                    style={textStyles['heroTitle'] || {}} onStyleChange={(style) => handleStyleChange('heroTitle', style)} />
                 </h1>
                 <p className="text-xl mb-8">
-                  <EditableText initialText={formData.description} fieldName='description'/>
+                  <EditableText initialText={formData.description} fieldName='description'
+                   style={textStyles['heroDescription'] || {}} onStyleChange={(style) => handleStyleChange('heroDescription', style)}/>
                 </p>
                 <Button size="lg">
-                  <EditableText initialText="Get a Quote" fieldName='' />
+                  <EditableText initialText="Get a Quote" fieldName=''
+                  style={textStyles['heroButton'] || {}} onStyleChange={(style) => handleStyleChange('heroButton', style)} />
                 </Button>
               </div>
               <div className="md:w-1/2">
@@ -136,13 +136,19 @@ export default function Home() {
           ) : (
             <>
               <h1 className="text-4xl font-bold mb-4">
-                <EditableText initialText={formData.companyName} fieldName='companyName' />
+                <EditableText initialText={formData.companyName} 
+                fieldName='companyName' 
+                style={textStyles['heroTitle'] || {}} onStyleChange={(style) => handleStyleChange('heroTitle', style)} />
               </h1>
               <p className="text-xl mb-8">
-                <EditableText initialText={formData.description} fieldName='description' />
+                <EditableText initialText={formData.description} 
+                fieldName='description' 
+                style={textStyles['heroDescription'] || {}} onStyleChange={(style) => handleStyleChange('heroDescription', style)}/>
               </p>
               <Button size="lg">
-                <EditableText initialText="Get a Quote" fieldName=''/>
+                <EditableText initialText="Get a Quote" fieldName=''
+                style={textStyles['heroButton'] || {}} onStyleChange={(style) => handleStyleChange('heroButton', style)}
+                />
               </Button>
             </>
           )}
@@ -158,17 +164,21 @@ export default function Home() {
         />
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">
-            <EditableText initialText="Our Services" fieldName=''/>
+            <EditableText initialText="Our Services" 
+            fieldName=''
+            style={textStyles['servicesTitle'] || {}} onStyleChange={(style) => handleStyleChange('servicesTitle', style)}/>
           </h2>
           {servicesLayout === 'grid' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {formData.services.map((service, index) => (
                 <div key={index} className="bg-white p-6 rounded-lg shadow-md">
                   <h3 className="text-xl font-semibold mb-4">
-                    <EditableText initialText={service} fieldName='' />
+                    <EditableText initialText={service} fieldName=''
+                     style={textStyles[`service${index}`] || {}} onStyleChange={(style) => handleStyleChange(`service${index}`, style)} />
                   </h3>
                   <p>
-                    <EditableText initialText={`Description for ${service}`} fieldName=''  />
+                    <EditableText initialText={`Description for ${service}`} fieldName='' 
+                    style={textStyles[`serviceDescription${index}`] || {}} onStyleChange={(style) => handleStyleChange(`serviceDescription${index}`, style)} />
                   </p>
                 </div>
               ))}
@@ -179,10 +189,12 @@ export default function Home() {
               {formData.services.map((service, index) => (
                 <div key={index} className="bg-white p-6 rounded-lg shadow-md">
                   <h3 className="text-xl font-semibold mb-4">
-                    <EditableText initialText={service}fieldName=''  />
+                    <EditableText initialText={service} fieldName='' 
+                    style={textStyles[`service${index}`] || {}} onStyleChange={(style) => handleStyleChange(`service${index}`, style)} />
                   </h3>
                   <p>
-                    <EditableText initialText={`Description for ${service}`} fieldName=''  />
+                    <EditableText initialText={`Description for ${service}`} fieldName=''
+                     style={textStyles[`serviceDescription${index}`] || {}} onStyleChange={(style) => handleStyleChange(`serviceDescription${index}`, style)}  />
                   </p>
                 </div>
               ))}
@@ -193,10 +205,13 @@ export default function Home() {
               {formData.services.map((service, index) => (
                 <div key={index} className="bg-white p-6 rounded-lg shadow-md min-w-[300px]">
                   <h3 className="text-xl font-semibold mb-4">
-                    <EditableText initialText={service} fieldName=''  />
+                    <EditableText initialText={service} fieldName=''  
+                    style={textStyles[`service${index}`] || {}} onStyleChange={(style) => handleStyleChange(`service${index}`, style)}
+                    />
                   </h3>
                   <p>
-                    <EditableText initialText={`Description for ${service}`} fieldName='' />
+                    <EditableText initialText={`Description for ${service}`} fieldName=''
+                    style={textStyles[`serviceDescription${index}`] || {}} onStyleChange={(style) => handleStyleChange(`serviceDescription${index}`, style)} />
                   </p>
                 </div>
               ))}
@@ -220,11 +235,13 @@ export default function Home() {
             <div className="max-w-2xl mx-auto">
               <p className="text-lg mb-4">
                 <EditableText initialText={`${formData.companyName} has been providing top-notch pumping services since ${formData.yearEstablished}. ${formData.description}`}
-                fieldName=''  />
+                fieldName='' 
+                style={textStyles['aboutTitle'] || {}} onStyleChange={(style) => handleStyleChange('aboutTitle', style)} />
               </p>
               <p className="text-lg">
                 <EditableText initialText="We pride ourselves on our commitment to customer satisfaction, use of cutting-edge technology, and adherence to the highest industry standards." 
-                fieldName='' />
+                fieldName=''
+                style={textStyles['aboutParagraph1'] || {}} onStyleChange={(style) => handleStyleChange('aboutParagraph1', style)} />
               </p>
             </div>
           )}
@@ -233,13 +250,16 @@ export default function Home() {
               <div>
                 <p className="text-lg">
                   <EditableText initialText={`${formData.companyName} has been providing top-notch pumping services since ${formData.yearEstablished}. ${formData.description}`} 
-                  fieldName='' />
+                  fieldName='' 
+                  style={textStyles['aboutParagraph1'] || {}} onStyleChange={(style) => handleStyleChange('aboutParagraph1', style)}/>
                 </p>
               </div>
               <div>
                 <p className="text-lg">
                   <EditableText initialText="We pride ourselves on our commitment to customer satisfaction, use of cutting-edge technology, and adherence to the highest industry standards." 
-                  fieldName='' />
+                  fieldName=''
+                  style={textStyles['aboutParagraph2'] || {}}
+                   onStyleChange={(style) => handleStyleChange('aboutParagraph2', style)} />
                 </p>
               </div>
             </div>
@@ -249,11 +269,13 @@ export default function Home() {
               <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
                 <p className="text-lg mb-4">
                   <EditableText initialText={`${formData.companyName} has been providing top-notch pumping services since ${formData.yearEstablished}. ${formData.description}`}
-                  fieldName=''  />
+                  fieldName=''
+                  style={textStyles['aboutParagraph1'] || {}} onStyleChange={(style) => handleStyleChange('aboutParagraph1', style)}  />
                 </p>
                 <p className="text-lg">
                   <EditableText initialText="We pride ourselves on our commitment to customer satisfaction, use of cutting-edge technology, and adherence to the highest industry standards." 
-                  fieldName='' />
+                  fieldName='' 
+                  style={textStyles['aboutParagraph2'] || {}} onStyleChange={(style) => handleStyleChange('aboutParagraph2', style)}/>
                 </p>
               </div>
               <div className="md:w-1/2">
@@ -273,22 +295,27 @@ export default function Home() {
         />
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">
-            <EditableText initialText="Contact Us" fieldName=''  />
+            <EditableText initialText="Contact Us" fieldName='' 
+             style={textStyles['contactTitle'] || {}} onStyleChange={(style) => handleStyleChange('contactTitle', style)}  />
           </h2>
           {contactLayout === 'centered' && (
             <div className="max-w-md mx-auto">
               <p className="text-center mb-4">
-                <EditableText initialText="Get in touch with us for all your pumping needs"  fieldName='' />
+                <EditableText initialText="Get in touch with us for all your pumping needs"  fieldName=''
+                style={textStyles['contactParagraph'] || {}} onStyleChange={(style) => handleStyleChange('contactParagraph', style)} />
               </p>
               <div className="space-y-4">
                 <p>
-                  <strong>Phone:</strong> <EditableText initialText={formData.telephoneNumber}  fieldName='telephoneNumber' />
+                  <strong>Phone:</strong> <EditableText initialText={formData.telephoneNumber}  fieldName='telephoneNumber'
+                  style={textStyles['contactPhone'] || {}} onStyleChange={(style) => handleStyleChange('contactPhone', style)} />
                 </p>
                 <p>
-                  <strong>Email:</strong> <EditableText initialText={`info@${formData.companyName.toLowerCase().replace(' ', '')}.com`} fieldName='' />
+                  <strong>Email:</strong> <EditableText initialText={`info@${formData.companyName.toLowerCase().replace(' ', '')}.com`} fieldName='' 
+                  style={textStyles['contactAddress'] || {}} onStyleChange={(style) => handleStyleChange('contactAddress', style)}/>
                 </p>
                 <p>
-                  <strong>Address:</strong> <EditableText initialText={formData.address}  fieldName='address' />
+                  <strong>Address:</strong> <EditableText initialText={formData.address}  fieldName='address'
+                  style={textStyles['contactPhone'] || {}} onStyleChange={(style) => handleStyleChange('contactPhone', style)} />
                 </p>
               </div>
             </div>
@@ -299,13 +326,16 @@ export default function Home() {
                 <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
                 <div className="space-y-4">
                   <p>
-                    <strong>Phone:</strong> <EditableText initialText={formData.telephoneNumber} fieldName='telephoneNumber'  />
+                    <strong>Phone:</strong> <EditableText initialText={formData.telephoneNumber} fieldName='telephoneNumber' 
+                    style={textStyles['contactPhone'] || {}} onStyleChange={(style) => handleStyleChange('contactPhone', style)} />
                   </p>
                   <p>
-                    <strong>Email:</strong> <EditableText initialText={`info@${formData.companyName.toLowerCase().replace(' ', '')}.com`} fieldName='' />
+                    <strong>Email:</strong> <EditableText initialText={`info@${formData.companyName.toLowerCase().replace(' ', '')}.com`} fieldName=''
+                    style={textStyles['contactEmail'] || {}} onStyleChange={(style) => handleStyleChange('contactEmail', style)} />
                   </p>
                   <p>
-                    <strong>Address:</strong> <EditableText initialText={formData.address} fieldName='address'  />
+                    <strong>Address:</strong> <EditableText initialText={formData.address} fieldName='address' 
+                    style={textStyles['contactAddress'] || {}} onStyleChange={(style) => handleStyleChange('contactAddress', style)} />
                   </p>
                 </div>
               </div>
@@ -323,7 +353,8 @@ export default function Home() {
           {contactLayout === 'full-width' && (
             <div className="max-w-2xl mx-auto">
               <p className="text-center mb-4">
-                <EditableText initialText="Get in touch with us for all your pumping needs" fieldName='' />
+                <EditableText initialText="Get in touch with us for all your pumping needs" fieldName='' 
+                style={textStyles['contactParagraph'] || {}} onStyleChange={(style) => handleStyleChange('contactParagraph', style)}/>
               </p>
               <form className="space-y-4">
                 <input type="text" placeholder="Name" className="w-full p-2 border rounded" />
@@ -339,7 +370,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-8">
         <div className="container mx-auto px-4 text-center">
-          <EditableText initialText={`© ${new Date().getFullYear()} ${formData.companyName}. All rights reserved.`} fieldName=''  />
+          <EditableText initialText={`© ${new Date().getFullYear()} ${formData.companyName}. All rights reserved.`} fieldName='' 
+          style={textStyles['footerText'] || {}} onStyleChange={(style) => handleStyleChange('footerText', style)} />
         </div>
       </footer>
     </div>
