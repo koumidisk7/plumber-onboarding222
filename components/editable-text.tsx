@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -9,15 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 interface EditableTextProps {
   initialText: string
+  fieldName: string
   className?: string
-  style?: React.CSSProperties
-  onStyleChange?: (style: React.CSSProperties) => void
+  onTextChange?: (fieldName: string, text: string) => void
 }
 
-export function EditableText({ initialText, className = '', style = {}, onStyleChange }: EditableTextProps) {
+export function EditableText({ initialText, fieldName, className = '', onTextChange }: EditableTextProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [text, setText] = useState(initialText)
-  const [textStyle, setTextStyle] = useState<React.CSSProperties>(style)
+  const [textStyle, setTextStyle] = useState<React.CSSProperties>({})
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleClick = () => {
@@ -29,6 +29,9 @@ export function EditableText({ initialText, className = '', style = {}, onStyleC
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value)
+    if (onTextChange) {
+      onTextChange(fieldName, e.target.value)
+    }
   }
 
   const handleBlur = () => {
@@ -41,13 +44,9 @@ export function EditableText({ initialText, className = '', style = {}, onStyleC
     }
   }
 
-  const handleStyleChange = (newStyle: Partial<React.CSSProperties>) => {
-    const updatedStyle = { ...textStyle, ...newStyle }
-    setTextStyle(updatedStyle)
-    if (onStyleChange) {
-      onStyleChange(updatedStyle)
-    }
-  }
+  const handleStyleChange = useCallback((newStyle: Partial<React.CSSProperties>) => {
+    setTextStyle((prevStyle) => ({ ...prevStyle, ...newStyle }))
+  }, [])
 
   const fontFamilies = [
     'Arial, sans-serif',
@@ -86,7 +85,7 @@ export function EditableText({ initialText, className = '', style = {}, onStyleC
             <Input
               id="font-color"
               type="color"
-              value={textStyle.color as string}
+              value={textStyle.color as string || '#000000'}
               onChange={(e) => handleStyleChange({ color: e.target.value })}
             />
           </div>
@@ -103,7 +102,7 @@ export function EditableText({ initialText, className = '', style = {}, onStyleC
             <Label htmlFor="font-family">Font Family</Label>
             <Select
               onValueChange={(value) => handleStyleChange({ fontFamily: value })}
-              defaultValue={textStyle.fontFamily as string}
+              defaultValue={textStyle.fontFamily as string || fontFamilies[0]}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select font family" />
