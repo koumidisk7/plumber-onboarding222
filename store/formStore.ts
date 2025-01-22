@@ -22,6 +22,19 @@ export type FormData2 = {
   address: string;
   openingHours: OpeningHours;
   language: Language;
+  // New fields
+  aboutParagraph1: string;
+  aboutParagraph2: string;
+  heroTitle: string;
+  heroDescription: string;
+  heroButton: string;
+  servicesTitle: string;
+  contactTitle: string;
+  contactParagraph: string;
+  contactEmail: string;
+  contactPhone: string;
+  contactAddress: string;
+  footerText: string;
 }
 
 type FormStore = {
@@ -31,7 +44,7 @@ type FormStore = {
   setAllFormData: (data: FormData2) => void;
 }
 
-export const  INITIAL_DATA: FormData2 = {
+export const INITIAL_DATA: FormData2 = {
   id: '',
   companyName: '',
   companyRegistrationNumber: '',
@@ -54,6 +67,19 @@ export const  INITIAL_DATA: FormData2 = {
     friday: null,
   },
   language: 'en',
+  // New fields with default values
+  aboutParagraph1: '',
+  aboutParagraph2: '',
+  heroTitle: 'Welcome to Our Company',
+  heroDescription: 'We provide top-notch services',
+  heroButton: 'Get a Quote',
+  servicesTitle: 'Our Services',
+  contactTitle: 'Contact Us',
+  contactParagraph: 'Get in touch with us for all your needs',
+  contactEmail: 'info@example.com',
+  contactPhone: '+1 (123) 456-7890',
+  contactAddress: '123 Main St, City, State, ZIP',
+  footerText: '© 2023 Company Name. All rights reserved.',
 }
 
 export const useFormStore = create<FormStore>((set) => ({

@@ -32,7 +32,6 @@ export default async function OnboardingPageSpecific({ params }: { params: { id:
   console.log(params.id)
   // console.log(user)
   const session = await getSession();
-  console.log(session)
   let res : Nullable<FormData2>;
   res=null;
 
@@ -60,7 +59,6 @@ if (params.id!=null&&session!=null){
     },
   });
   res = result.Item as FormData2;
-  console.log(image)
   if(image !=null&&image!=undefined&&image.Item!=undefined&&image.Item !=null){
     let temp = res as Record<string, any>;
     if(temp !=null&&temp!=undefined){

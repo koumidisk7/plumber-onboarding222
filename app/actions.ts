@@ -8,6 +8,8 @@ import { Resend } from 'resend';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { useSession, signIn, signOut } from "next-auth/react"
+import { useWebsiteStore, SerializableWebsiteState } from '../store/useWebsiteStore'
+
 type FormData = {
   id: string;
   companyName: string;
@@ -45,62 +47,12 @@ export async function submitPlumberOnboarding(data: FormData) {
   });
 
   // Simulate a delay to mimic a database operation
-  await new Promise(resolve => setTimeout(resolve, 1000))
   console.log('Test0')
 
   // Authenticate with Auth0
   const session = await auth0.getSession();
   console.log('Test1')
-/*
-  if (!session) {
-    redirect('/api/auth/login');
-    //auth0.handleAuth();
-  }
-console.log('Test2')
-  // Save user data to DynamoDB
 
-  const response = await fetch(process.env.BASE_URL+'/app/api/save-user-data', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      userId: session.user.sub,
-      ...data,
-    }),
-  });  */
-/*
-  if (!response.ok) {
-    throw new Error('Failed to save user data');
-  }
-
-  // Redirect to dashboard
-  redirect('/dashboard');*/
-  try {
-    // await dynamoDb.put({
-    //   TableName: process.env.DYNAMODB_TABLE_NAME!,
-    //   Item: {
-    //     id: data.id,
-    //     userId,
-    //     ...data,
-    //     openingHours: Object.fromEntries(
-    //       Object.entries(data.openingHours).filter(([_, value]) => value !== null)
-    //     ),
-    //   },
-    // })
-    // const response = await fetch(process.env.BASE_URL+'/app/api/save-user-data', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     ...data,
-    //     userId:data.id
-    //   }),
-    // }); 
-  }catch (error) {}
-
-console.log('session')
   if (session) {
     console.log(session.user.sub)
     try {
@@ -145,7 +97,7 @@ console.log('session')
         })
         console.log('put2')
 
-        console.log('sendok2')
+        console.log(`${session.user.sub}||${dataWithoutImage.companyRegistrationNumber}`)
 
     const result = await dynamoDb.get({
       TableName: process.env.DYNAMODB_TABLE_NAME!,
@@ -196,3 +148,42 @@ console.log(result)
  // redirect('../dashboard');
 }
 
+
+export async function submitDesignData(data: FormData,useWebsiteStore:SerializableWebsiteState,companyId:string) {
+  console.log('Plumber onboarding data:', {
+    ...data,
+    openingHours: Object.fromEntries(
+      Object.entries(data.openingHours).filter(([_, value]) => value !== null)
+    ),
+  });
+  console.log('formData.companyRegistrationNumber2222');
+
+  console.log(data.companyRegistrationNumber);
+
+
+  // Authenticate with Auth0
+  try {
+  const session = await auth0.getSession();
+
+      const {logo, ...dataWithoutImage} = data
+      data.logo=''
+     
+
+      await dynamoDb.put({
+          TableName: process.env.DYNAMODB_TABLE_NAME!,
+          Item: {
+            pk: `${session?.user.sub}||design`,
+            sk: `${session?.user.sub}||design||${dataWithoutImage.companyRegistrationNumber}`,
+            ...useWebsiteStore,
+          },
+        })
+        console.log( ` actions ==> ${session?.user.sub}||design||${dataWithoutImage.companyRegistrationNumber}`)
+        console.log( ` actions2 ==> ${session?.user.sub}||design||${companyId}`)
+
+        return { success: true, message: 'Data saved successfully' }
+      } catch (error) {
+        console.error('Error saving data to DynamoDB:', error)
+        return { success: false, message: 'Error saving data' }
+      }
+ // redirect('../dashboard');
+}

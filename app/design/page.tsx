@@ -68,11 +68,8 @@ export default function Home() {
     }
   }
   const handleTextChange = useCallback((fieldName: string, text: string) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [fieldName]: text,
-    }));
-  }, []);
+    updateFormData({ [fieldName]: text });
+  }, [updateFormData]);
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -82,7 +79,8 @@ export default function Home() {
             <LogoUploader logo={formData.logo} onUpload={(file) => {
               const reader = new FileReader();
               reader.onloadend = () => {
-                setFormData(prev => ({ ...prev, logo: reader.result as string }));
+                updateFormData({ logo: reader.result as string });
+                setHeaderLogo(file);
               };
               reader.readAsDataURL(file);
             }} />

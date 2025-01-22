@@ -1,24 +1,35 @@
-'use client'
+"use client"
 
-import { useState, useRef, useCallback } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover'
-import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
-import { Label } from '../components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
+import { useState, useRef, useCallback } from "react"
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
+import { Button } from "./ui/button"
+import { Input } from "./ui/input"
+import { Label } from "./ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select"
+import { SerializableWebsiteState, useWebsiteStore } from "../store/useWebsiteStore"
 
 interface EditableTextProps {
   initialText: string
   fieldName: string
   className?: string
   onTextChange?: (fieldName: string, text: string) => void
+  onStyleChange?: (fieldName: string, style: Partial<React.CSSProperties>) => void
+  specificStyleName?: string
+
 }
 
-export function EditableText({ initialText, fieldName, className = '', onTextChange }: EditableTextProps) {
+export function EditableText({
+  initialText,
+  fieldName,
+  className = "",
+  onTextChange,
+  onStyleChange,
+  specificStyleName=undefined
+}: EditableTextProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [text, setText] = useState(initialText)
-  const [textStyle, setTextStyle] = useState<React.CSSProperties>({})
   const inputRef = useRef<HTMLInputElement>(null)
+  const websiteStore = useWebsiteStore()
 
   const handleClick = () => {
     setIsEditing(true)
@@ -39,21 +50,26 @@ export function EditableText({ initialText, fieldName, className = '', onTextCha
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleBlur()
     }
   }
 
-  const handleStyleChange = useCallback((newStyle: Partial<React.CSSProperties>) => {
-    setTextStyle((prevStyle) => ({ ...prevStyle, ...newStyle }))
-  }, [])
+  const handleStyleChange = useCallback(
+    (newStyle: Partial<React.CSSProperties>) => {
+      if (onStyleChange) {
+        onStyleChange(specificStyleName??fieldName, newStyle)
+      }
+    },
+    [fieldName, specificStyleName,onStyleChange],
+  )
 
   const fontFamilies = [
-    'Arial, sans-serif',
-    'Helvetica, sans-serif',
-    'Georgia, serif',
-    'Times New Roman, serif',
-    'Courier New, monospace',
+    "Arial, sans-serif",
+    "Helvetica, sans-serif",
+    "Georgia, serif",
+    "Times New Roman, serif",
+    "Courier New, monospace",
   ]
 
   if (isEditing) {
@@ -66,7 +82,7 @@ export function EditableText({ initialText, fieldName, className = '', onTextCha
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         className={`bg-transparent border-b border-gray-300 focus:outline-none focus:border-primary ${className}`}
-        style={textStyle}
+        style={websiteStore[`${fieldName}Style`] as React.CSSProperties}
       />
     )
   }
@@ -74,7 +90,10 @@ export function EditableText({ initialText, fieldName, className = '', onTextCha
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <span className={`cursor-pointer hover:bg-gray-100 ${className}`} style={textStyle}>
+        <span
+          className={`cursor-pointer hover:bg-gray-100 ${className}`}
+          style={websiteStore[`${specificStyleName??fieldName}Style`] as React.CSSProperties}
+        >
           {text}
         </span>
       </PopoverTrigger>
@@ -85,7 +104,7 @@ export function EditableText({ initialText, fieldName, className = '', onTextCha
             <Input
               id="font-color"
               type="color"
-              value={textStyle.color as string || '#000000'}
+              value={(websiteStore[`${specificStyleName??fieldName}Style`] as React.CSSProperties)?.color || "#000000"}
               onChange={(e) => handleStyleChange({ color: e.target.value })}
             />
           </div>
@@ -94,7 +113,7 @@ export function EditableText({ initialText, fieldName, className = '', onTextCha
             <Input
               id="font-size"
               type="number"
-              value={parseInt(textStyle.fontSize as string) || 16}
+              value={Number.parseInt((websiteStore[`${specificStyleName??fieldName}Style`] as React.CSSProperties)?.fontSize as string) || 16}
               onChange={(e) => handleStyleChange({ fontSize: `${e.target.value}px` })}
             />
           </div>
@@ -102,7 +121,7 @@ export function EditableText({ initialText, fieldName, className = '', onTextCha
             <Label htmlFor="font-family">Font Family</Label>
             <Select
               onValueChange={(value) => handleStyleChange({ fontFamily: value })}
-              defaultValue={textStyle.fontFamily as string || fontFamilies[0]}
+              defaultValue={((websiteStore[`${specificStyleName??fieldName}Style`] as React.CSSProperties)?.fontFamily as string) || fontFamilies[0]}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select font family" />
@@ -110,7 +129,7 @@ export function EditableText({ initialText, fieldName, className = '', onTextCha
               <SelectContent>
                 {fontFamilies.map((font) => (
                   <SelectItem key={font} value={font}>
-                    {font.split(',')[0]}
+                    {font.split(",")[0]}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -8,13 +8,17 @@ import { FormData2, useFormStore } from '../../../store/formStore'
 import { getSession } from '@auth0/nextjs-auth0';
 import { DynamoDBDocument,QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
+import {  INITIAL_WEBSITE_STATE, SerializableWebsiteState } from '../../../store/useWebsiteStore'
+import LeftSidebar from './left-sidebar'
 
 export default async function Home({ params }: { params: { id: string } }) {
   const session = await getSession();
   type Nullable<T> = T | null;
 
   let res : Nullable<FormData2>;
+  let resDesign : Nullable<SerializableWebsiteState>;
   res=null;
+  resDesign=null;
   if (params.id!=null&&session!=null){
     const dynamoDb = DynamoDBDocument.from(new DynamoDB({
       region: process.env.AWS_REGION,
@@ -38,8 +42,9 @@ export default async function Home({ params }: { params: { id: string } }) {
         sk: `${session.user.sub}||${params.id}||image`,
       },
     });
+    console.log(result)
+    console.log(`${session.user.sub}||${params.id}`)
     res = result.Item as FormData2;
-    console.log(image)
     if(image !=null&&image!=undefined&&image.Item!=undefined&&image.Item !=null){
       let temp = res as Record<string, any>;
       if(temp !=null&&temp!=undefined){
@@ -47,16 +52,41 @@ export default async function Home({ params }: { params: { id: string } }) {
       res.logo=temp?.logo;
       }
     }
-    console.log('result')
-    console.log(`${session.user.sub}||${params.id}||${params.id}||en`)
-   console.log(result)
+
+   
+   const resultDesign = await dynamoDb.get({
+    TableName: process.env.DYNAMODB_TABLE_NAME!,
+    Key: {
+      pk: `${session?.user.sub}||design`,
+      sk: `${session?.user.sub}||design||${params.id}`,
+    },
+  });
+if(resultDesign.Item!= undefined){
+  resDesign = resultDesign.Item as SerializableWebsiteState;
+
+}
+else
+{resDesign=INITIAL_WEBSITE_STATE;}
+console.log(resultDesign )
+console.log(`page ==> ${session?.user.sub}||design||${params.id}`)
+console.log(`page ==> ${res?.companyRegistrationNumber}`)
+console.log(res)
+
   }
     
 
   // const { formData, updateFormData } = useFormStore()
   
   return (
-    <PageDesigner formData={res}/>
+    
+    <div className="flex min-h-screen">
+      <LeftSidebar />
+
+      <main className="flex-grow overflow-x-hidden">
+       <PageDesigner companyData={res} resDesign={resDesign}  /> 
+
+      </main>
+    </div>
   )
 }
 

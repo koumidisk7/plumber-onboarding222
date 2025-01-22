@@ -1,18 +1,19 @@
 'use client'
 import { create } from 'zustand'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { EditableText } from './editable-text'
 import { LayoutSuggestions } from './layout-suggestions'
 import { Button } from './ui/button'
 import { ColorPicker } from './color-picker'
 import { LogoUploader } from './logo-uploader'
-import { FormData2, useFormStore } from '../store/formStore'
+import {  useFormStore } from '../store/formStore'
 import { submitPlumberOnboarding } from '../app/actions'
 
 import { useWebsiteStore } from '../store/useWebsiteStore'
 import router from 'next/router'
 
+import { heroLayouts, servicesLayouts, aboutLayouts, contactLayouts } from "../lib/layout-options"
 
 type LayoutType = 'centered' | 'left-aligned' | 'with-image' | 'grid' | 'list' | 'carousel' | 'single-column' | 'two-column' | 'split' | 'full-width'
 
@@ -34,54 +35,53 @@ interface WebsiteState {
   setHeaderLogo: (logo: File | null) => void
 }
 
-interface PageDesignerProps {
-    formData: FormData2;
-  }
-export default function Home({formData}:PageDesignerProps) {
 
-  const {  updateFormData } = useFormStore()
-  const {
-    editableTextClasses,
-    heroLayout,
-    servicesLayout,
-    aboutLayout,
-    contactLayout,
-    headerTextColor,
-    headerLogo,
-    setHeroLayout,
-    setServicesLayout,
-    setAboutLayout,
-    setContactLayout,
-    setHeaderTextColor,
-    setHeaderLogo,
-  } = useWebsiteStore()
+export default function Home({companyData, resDesign}) {
+
+  const {  updateFormData ,setAllFormData, formData} = useFormStore()
+
+
+  useEffect(() => {
+    
+    console.log(companyData?.companyRegistrationNumber)
+
+    if (companyData) {
+        setAllFormData(companyData)
+        console.log('set companyData.companyRegistrationNumber c')
+        console.log(companyData.companyRegistrationNumber)
+        console.log('set companyData.companyRegistrationNumber c2')
+        console.log(formData.companyRegistrationNumber)
+
+    } 
+  }, [ companyData, updateFormData]);
+  const websiteStore = useWebsiteStore()
+  const handleStyleChange = useCallback(
+    (fieldName: string, style: Partial<React.CSSProperties>) => {
+      const setter = `set${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}Style` as keyof typeof websiteStore
+      console.log('typeof websiteStoresetter=>'+`set${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}Style`)
+      console.log(typeof websiteStore[setter] === "function")
+      if (typeof websiteStore[setter] === "function") {
+        ;(websiteStore[setter] as (style: React.CSSProperties) => void)(style)
+      }
+    },
+    [websiteStore],
+  )
+
+
+  useEffect(() => {
+    
+    console.log('resDesign')
+    console.log(resDesign)
+
+    if (resDesign) {
+      websiteStore.setWebsiteState(resDesign)
+    } 
+  }, [ resDesign]);  
+  //resDesign=resDesign??websiteState
   const handleTextChange = useCallback((fieldName: string, text: string) => {
     updateFormData({ [fieldName]: text });
 }, [updateFormData]);
 
-  const heroLayouts = [
-    { name: 'centered', description: 'Content centered on the page' },
-    { name: 'left-aligned', description: 'Content aligned to the left' },
-    { name: 'with-image', description: 'Text on the left, image on the right' },
-  ]
-
-  const servicesLayouts = [
-    { name: 'grid', description: '3-column grid layout' },
-    { name: 'list', description: 'Vertical list layout' },
-    { name: 'carousel', description: 'Horizontal scrolling carousel' },
-  ]
-
-  const aboutLayouts = [
-    { name: 'single-column', description: 'Text in a single column' },
-    { name: 'two-column', description: 'Text split into two columns' },
-    { name: 'with-image', description: 'Text on one side, image on the other' },
-  ]
-
-  const contactLayouts = [
-    { name: 'centered', description: 'Contact info centered on the page' },
-    { name: 'split', description: 'Contact form on one side, info on the other' },
-    { name: 'full-width', description: 'Full-width contact form' },
-  ]
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
@@ -95,6 +95,7 @@ export default function Home({formData}:PageDesignerProps) {
   
   return (
     <div className="min-h-screen bg-background text-foreground">
+      
       {/* Header */}
       <header className="bg-primary py-4 relative">
         <div className="container mx-auto px-4 flex justify-between items-center">
@@ -102,69 +103,122 @@ export default function Home({formData}:PageDesignerProps) {
             <LogoUploader logo={formData.logo} onUpload={(file) => {
               const reader = new FileReader();
               reader.onloadend = () => {
-                updateFormData({ logo: reader.result as string });
-                setHeaderLogo(file);
+                updateFormData({ logo: reader.result as string })
+                websiteStore.setHeaderLogo(reader.result as string)
               };
               reader.readAsDataURL(file);
             }} />
             <EditableText
               initialText={formData.companyName || 'Company Name'}
               fieldName="companyName"
-              className={editableTextClasses.companyName}
+              className={websiteStore.companyNameStyle as string}
               onTextChange={handleTextChange}
+              onStyleChange={handleStyleChange}
             />
           </div>
           <nav className="flex items-center space-x-4">
             <ul className="flex space-x-4">
-              <li><EditableText initialText="Home" fieldName="navHome" className={editableTextClasses.navItem} onTextChange={handleTextChange} /></li>
-              <li><EditableText initialText="Services" fieldName="navServices" className={editableTextClasses.navItem} onTextChange={handleTextChange} /></li>
-              <li><EditableText initialText="About" fieldName="navAbout" className={editableTextClasses.navItem} onTextChange={handleTextChange} /></li>
-              <li><EditableText initialText="Contact" fieldName="navContact" className={editableTextClasses.navItem} onTextChange={handleTextChange} /></li>
+              <li><EditableText initialText="Home" fieldName="navHome"
+              className={websiteStore.navItemStyle as string}
+              onTextChange={handleTextChange}
+              onStyleChange={handleStyleChange}
+           /></li>
+              <li><EditableText initialText="Services" fieldName="navServices"
+                  className={websiteStore.navItemStyle as string}
+                  onTextChange={handleTextChange}
+                  onStyleChange={handleStyleChange} /></li>
+              <li><EditableText initialText="About" fieldName="navAbout" 
+                  className={websiteStore.navItemStyle as string}
+                  onTextChange={handleTextChange}
+                  onStyleChange={handleStyleChange} /></li>
+              <li><EditableText initialText="Contact" fieldName="navContact"
+                    className={websiteStore.navItemStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange} /></li>
             </ul>
-            <ColorPicker onChange={setHeaderTextColor} />
+            <ColorPicker onChange={websiteStore.setHeaderTextColor} />
           </nav>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className={`py-20 bg-gray-100 relative ${
-        heroLayout === 'centered' ? 'text-center' :
-        heroLayout === 'left-aligned' ? 'text-left' :
-        'flex items-center'
-      }`}>
-        <LayoutSuggestions
-          sectionName="Hero"
-          options={heroLayouts}
-          onSelectLayout={setHeroLayout}
-        />
-        <div className="container mx-auto px-4">
-          {heroLayout === 'with-image' ? (
+      <section
+        className={`py-20 bg-gray-100 relative ${
+          websiteStore.heroLayout === "centered"
+            ? "text-center"
+            : websiteStore.heroLayout === "left-aligned"
+              ? "text-left"
+              : "flex items-center"
+        }`}
+      >
+  <div className="container mx-auto px-4">
+          {websiteStore.heroLayout === "with-image" ? (
             <div className="flex flex-col md:flex-row items-center">
               <div className="md:w-1/2 mb-8 md:mb-0">
-                <h1 className={editableTextClasses.heroTitle}>
-                  <EditableText initialText={formData.companyName || 'Company Name'} fieldName="heroTitle" className={editableTextClasses.heroTitle} onTextChange={handleTextChange} />
+                <h1 className={websiteStore.heroTitleStyle as string}>
+                  <EditableText
+                    initialText={formData.heroTitle}
+                    fieldName="heroTitle"
+                    className={websiteStore.heroTitleStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </h1>
-                <p className={editableTextClasses.heroDescription}>
-                  <EditableText initialText={formData.description || 'Company Description'} fieldName="heroDescription" className={editableTextClasses.heroDescription} onTextChange={handleTextChange} />
+                <p className={websiteStore.heroDescriptionStyle as string}>
+                  <EditableText
+                    initialText={formData.heroDescription}
+                    fieldName="heroDescription"
+                    className={websiteStore.heroDescriptionStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </p>
                 <Button size="lg">
-                  <EditableText initialText="Get a Quote" fieldName="heroButton" className={editableTextClasses.heroButton} onTextChange={handleTextChange} />
+                  <EditableText
+                    initialText={formData.heroButton}
+                    fieldName="heroButton"
+                    className={websiteStore.heroButtonStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </Button>
               </div>
               <div className="md:w-1/2">
-                <img src="/placeholder.svg?height=300&width=400" alt="Pumping Services" className="w-full h-auto rounded-lg shadow-md" />
+                <img
+                  src="/placeholder.svg?height=300&width=400"
+                  alt="Pumping Services"
+                  className="w-full h-auto rounded-lg shadow-md"
+                />
               </div>
             </div>
           ) : (
             <>
-              <h1 className={editableTextClasses.heroTitle}>
-                <EditableText initialText={formData.companyName || 'Company Name'} fieldName="heroTitle" className={editableTextClasses.heroTitle} onTextChange={handleTextChange} />
+              <h1 className={websiteStore.heroTitleStyle as string}>
+                <EditableText
+                  initialText={formData.heroTitle}
+                  fieldName="heroTitle"
+                  className={websiteStore.heroTitleStyle as string}
+                  onTextChange={handleTextChange}
+                  onStyleChange={handleStyleChange}
+                />
               </h1>
-              <p className={editableTextClasses.heroDescription}>
-                <EditableText initialText={formData.description || 'Company Description'} fieldName="heroDescription" className={editableTextClasses.heroDescription} onTextChange={handleTextChange} />
+              <p className={websiteStore.heroDescriptionStyle as string}>
+                <EditableText
+                  initialText={formData.heroDescription}
+                  fieldName="heroDescription"
+                  className={websiteStore.heroDescriptionStyle as string}
+                  onTextChange={handleTextChange}
+                  onStyleChange={handleStyleChange}
+                />
               </p>
               <Button size="lg">
-                <EditableText initialText="Get a Quote" fieldName="heroButton" className={editableTextClasses.heroButton} onTextChange={handleTextChange} />
+                <EditableText
+                  initialText={formData.heroButton}
+                  fieldName="heroButton"
+                  className={websiteStore.heroButtonStyle as string}
+                  onTextChange={handleTextChange}
+                  onStyleChange={handleStyleChange}
+                />
               </Button>
             </>
           )}
@@ -172,53 +226,99 @@ export default function Home({formData}:PageDesignerProps) {
       </section>
 
       {/* Services Section */}
+      
       <section className="py-20 relative">
-        <LayoutSuggestions
-          sectionName="Services"
-          options={servicesLayouts}
-          onSelectLayout={setServicesLayout}
-        />
         <div className="container mx-auto px-4">
-          <h2 className={editableTextClasses.sectionTitle}>
-            <EditableText initialText="Our Services" fieldName="servicesTitle" className={editableTextClasses.sectionTitle} onTextChange={handleTextChange} />
+          <h2 className={websiteStore.servicesTitleStyle as string}>
+            <EditableText
+              initialText={formData.servicesTitle}
+              fieldName="servicesTitle"
+              className={websiteStore.sectionTitleStyle as string}
+              onTextChange={handleTextChange}
+              onStyleChange={handleStyleChange}
+              specificStyleName='serviceTitle'
+
+            />
           </h2>
-          {servicesLayout === 'grid' && (
+          {websiteStore.servicesLayout === "grid" && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {(formData.services || []).map((service, index) => (
+              {formData.services.map((service, index) => (
                 <div key={index} className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className={editableTextClasses.serviceTitle}>
-                    <EditableText initialText={service} fieldName={`service${index}`} className={editableTextClasses.serviceTitle} onTextChange={handleTextChange} />
+                  <h3 className={websiteStore.serviceTitleStyle as string}>
+                    <EditableText
+                      initialText={service}
+                      fieldName={`service${index}`}
+                      className={websiteStore.serviceTitleStyle as string}
+                      onTextChange={handleTextChange}
+                      onStyleChange={handleStyleChange}
+                      specificStyleName='serviceTitle'
+                    />
                   </h3>
-                  <p>
-                    <EditableText initialText={`Description for ${service}`} fieldName={`serviceDescription${index}`} className={editableTextClasses.serviceDescription} onTextChange={handleTextChange} />
+                  <p className={websiteStore.serviceDescriptionStyle as string}>
+                    <EditableText
+                      initialText={`Description for ${service}`}
+                      fieldName={`serviceDescription${index}`}
+                      className={websiteStore.serviceDescriptionStyle as string}
+                      onTextChange={handleTextChange}
+                      onStyleChange={handleStyleChange}
+                      specificStyleName='serviceDescription'
+                    />
                   </p>
                 </div>
               ))}
             </div>
           )}
-          {servicesLayout === 'list' && (
+          {websiteStore.servicesLayout === "list" && (
             <div className="space-y-8">
-              {(formData.services || []).map((service, index) => (
+              {formData.services.map((service, index) => (
                 <div key={index} className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className={editableTextClasses.serviceTitle}>
-                    <EditableText initialText={service} fieldName={`service${index}`} className={editableTextClasses.serviceTitle} onTextChange={handleTextChange} />
+                  <h3 className={websiteStore.serviceTitleStyle as string}>
+                    <EditableText
+                      initialText={service}
+                      fieldName={`service${index}`}
+                      className={websiteStore.serviceTitleStyle as string}
+                      onTextChange={handleTextChange}
+                      onStyleChange={handleStyleChange}
+                      specificStyleName='serviceTitle'
+                    />
                   </h3>
-                  <p>
-                    <EditableText initialText={`Description for ${service}`} fieldName={`serviceDescription${index}`} className={editableTextClasses.serviceDescription} onTextChange={handleTextChange} />
+                  <p className={websiteStore.serviceDescriptionStyle as string}>
+                    <EditableText
+                      initialText={`Description for ${service}`}
+                      fieldName={`serviceDescription${index}`}
+                      className={websiteStore.serviceDescriptionStyle as string}
+                      onTextChange={handleTextChange}
+                      onStyleChange={handleStyleChange}
+                      specificStyleName='serviceDescription'
+                    />
                   </p>
                 </div>
               ))}
             </div>
           )}
-          {servicesLayout === 'carousel' && (
+          {websiteStore.servicesLayout === "carousel" && (
             <div className="flex overflow-x-auto space-x-6 pb-4">
-              {(formData.services || []).map((service, index) => (
+              {formData.services.map((service, index) => (
                 <div key={index} className="bg-white p-6 rounded-lg shadow-md min-w-[300px]">
-                  <h3 className={editableTextClasses.serviceTitle}>
-                    <EditableText initialText={service} fieldName={`service${index}`} className={editableTextClasses.serviceTitle} onTextChange={handleTextChange} />
+                  <h3 className={websiteStore.serviceTitleStyle as string}>
+                    <EditableText
+                      initialText={service}
+                      fieldName={`service${index}`}
+                      className={websiteStore.serviceTitleStyle as string}
+                      onTextChange={handleTextChange}
+                      onStyleChange={handleStyleChange}
+                      specificStyleName='serviceTitle'
+                    />
                   </h3>
-                  <p>
-                    <EditableText initialText={`Description for ${service}`} fieldName={`serviceDescription${index}`} className={editableTextClasses.serviceDescription} onTextChange={handleTextChange} />
+                  <p className={websiteStore.serviceDescriptionStyle as string}>
+                    <EditableText
+                      initialText={`Description for ${service}`}
+                      fieldName={`serviceDescription${index}`}
+                      className={websiteStore.serviceDescriptionStyle as string}
+                      onTextChange={handleTextChange}
+                      onStyleChange={handleStyleChange}
+                      specificStyleName='serviceDescription'
+                    />
                   </p>
                 </div>
               ))}
@@ -229,51 +329,92 @@ export default function Home({formData}:PageDesignerProps) {
 
       {/* About Section */}
       <section className="py-20 bg-gray-100 relative">
-        <LayoutSuggestions
-          sectionName="About"
-          options={aboutLayouts}
-          onSelectLayout={setAboutLayout}
-        />
         <div className="container mx-auto px-4">
-          <h2 className={editableTextClasses.sectionTitle}>
-            <EditableText initialText="About Us" fieldName="aboutTitle" className={editableTextClasses.sectionTitle} onTextChange={handleTextChange} />
+          <h2 className={websiteStore.aboutTitleStyle as string}>
+            <EditableText
+              initialText="About Us"
+              fieldName="aboutTitle"
+              className={websiteStore.aboutTitleStyle as string}
+              onTextChange={handleTextChange}
+              onStyleChange={handleStyleChange}
+            />
           </h2>
-          {aboutLayout === 'single-column' && (
+          {websiteStore.aboutLayout === "single-column" && (
             <div className="max-w-2xl mx-auto">
-              <p className={editableTextClasses.aboutParagraph}>
-                <EditableText initialText={`${formData.companyName || 'Company Name'} has been providing top-notch pumping services since ${formData.yearEstablished || 'Year'}. ${formData.description || 'Company Description'}`} fieldName="aboutParagraph1" className={editableTextClasses.aboutParagraph} onTextChange={handleTextChange} />
+              <p className={websiteStore.aboutParagraphStyle as string}>
+                <EditableText
+                  initialText={formData.aboutParagraph1}
+                  fieldName="aboutParagraph1"
+                  className={websiteStore.aboutParagraphStyle as string}
+                  onTextChange={handleTextChange}
+                  onStyleChange={handleStyleChange}
+                />
               </p>
-              <p className={editableTextClasses.aboutParagraph}>
-                <EditableText initialText="We pride ourselves on our commitment to customer satisfaction, use of cutting-edge technology, and adherence to the highest industry standards." fieldName="aboutParagraph2" className={editableTextClasses.aboutParagraph} onTextChange={handleTextChange} />
+              <p className={websiteStore.aboutParagraphStyle as string}>
+                <EditableText
+                  initialText={formData.aboutParagraph2}
+                  fieldName="aboutParagraph2"
+                  className={websiteStore.aboutParagraphStyle as string}
+                  onTextChange={handleTextChange}
+                  onStyleChange={handleStyleChange}
+                />
               </p>
             </div>
           )}
-          {aboutLayout === 'two-column' && (
+          {websiteStore.aboutLayout === "two-column" && (
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <p className={editableTextClasses.aboutParagraph}>
-                  <EditableText initialText={`${formData.companyName || 'Company Name'} has been providing top-notch pumping services since ${formData.yearEstablished || 'Year'}. ${formData.description || 'Company Description'}`} fieldName="aboutParagraph1" className={editableTextClasses.aboutParagraph} onTextChange={handleTextChange} />
+                <p className={websiteStore.aboutParagraphStyle as string}>
+                  <EditableText
+                    initialText={formData.aboutParagraph1}
+                    fieldName="aboutParagraph1"
+                    className={websiteStore.aboutParagraphStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </p>
               </div>
               <div>
-                <p className={editableTextClasses.aboutParagraph}>
-                  <EditableText initialText="We pride ourselves on our commitment to customer satisfaction, use of cutting-edge technology, and adherence to the highest industry standards." fieldName="aboutParagraph2" className={editableTextClasses.aboutParagraph} onTextChange={handleTextChange} />
+                <p className={websiteStore.aboutParagraphStyle as string}>
+                  <EditableText
+                    initialText={formData.aboutParagraph2}
+                    fieldName="aboutParagraph2"
+                    className={websiteStore.aboutParagraphStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </p>
               </div>
             </div>
           )}
-          {aboutLayout === 'with-image' && (
+          {websiteStore.aboutLayout === "with-image" && (
             <div className="flex flex-col md:flex-row items-center">
               <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
-                <p className={editableTextClasses.aboutParagraph}>
-                  <EditableText initialText={`${formData.companyName || 'Company Name'} has been providing top-notch pumping services since ${formData.yearEstablished || 'Year'}. ${formData.description || 'Company Description'}`} fieldName="aboutParagraph1" className={editableTextClasses.aboutParagraph} onTextChange={handleTextChange} />
+                <p className={websiteStore.aboutParagraphStyle as string}>
+                  <EditableText
+                    initialText={formData.aboutParagraph1}
+                    fieldName="aboutParagraph1"
+                    className={websiteStore.aboutParagraphStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </p>
-                <p className={editableTextClasses.aboutParagraph}>
-                  <EditableText initialText="We pride ourselves on our commitment to customer satisfaction, use of cutting-edge technology, and adherence to the highest industry standards." fieldName="aboutParagraph2" className={editableTextClasses.aboutParagraph} onTextChange={handleTextChange} />
+                <p className={websiteStore.aboutParagraphStyle as string}>
+                  <EditableText
+                    initialText={formData.aboutParagraph2}
+                    fieldName="aboutParagraph2"
+                    className={websiteStore.aboutParagraphStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </p>
               </div>
               <div className="md:w-1/2">
-                <img src="/placeholder.svg?height=300&width=400" alt="About Pumpers Pro" className="w-full h-auto rounded-lg shadow-md" />
+                <img
+                  src="/placeholder.svg?height=300&width=400"
+                  alt="About Our Company"
+                  className="w-full h-auto rounded-lg shadow-md"
+                />
               </div>
             </div>
           )}
@@ -282,46 +423,95 @@ export default function Home({formData}:PageDesignerProps) {
 
       {/* Contact Section */}
       <section className="py-20 relative">
-        <LayoutSuggestions
-          sectionName="Contact"
-          options={contactLayouts}
-          onSelectLayout={setContactLayout}
-        />
         <div className="container mx-auto px-4">
-          <h2 className={editableTextClasses.contactTitle}>
-            <EditableText initialText="Contact Us" fieldName="contactTitle" className={editableTextClasses.contactTitle} onTextChange={handleTextChange} />
+          <h2 className={websiteStore.contactTitleStyle as string}>
+            <EditableText
+              initialText={formData.contactTitle}
+              fieldName="contactTitle"
+              className={websiteStore.contactTitleStyle as string}
+              onTextChange={handleTextChange}
+              onStyleChange={handleStyleChange}
+            />
           </h2>
-          {contactLayout === 'centered' && (
+          {websiteStore.contactLayout === "centered" && (
             <div className="max-w-md mx-auto">
-              <p className={editableTextClasses.contactParagraph}>
-                <EditableText initialText="Get in touch with us for all your pumping needs" fieldName="contactParagraph" className={editableTextClasses.contactParagraph} onTextChange={handleTextChange} />
+              <p className={websiteStore.contactParagraphStyle as string}>
+                <EditableText
+                  initialText={formData.contactParagraph}
+                  fieldName="contactParagraph"
+                  className={websiteStore.contactParagraphStyle as string}
+                  onTextChange={handleTextChange}
+                  onStyleChange={handleStyleChange}
+                />
               </p>
               <div className="space-y-4">
                 <p>
-                  <strong>Phone:</strong> <EditableText initialText={formData.telephoneNumber || 'Phone Number'} fieldName="contactPhone" className={editableTextClasses.contactInfo} onTextChange={handleTextChange} />
+                  <strong>Phone:</strong>{" "}
+                  <EditableText
+                    initialText={formData.contactPhone}
+                    fieldName="contactPhone"
+                    className={websiteStore.contactInfoStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </p>
                 <p>
-                  <strong>Email:</strong> <EditableText initialText={`info@${(formData.companyName || 'Company Name').toLowerCase().replace(' ', '')}.com`} fieldName="contactEmail" className={editableTextClasses.contactInfo} onTextChange={handleTextChange} />
+                  <strong>Email:</strong>{" "}
+                  <EditableText
+                    initialText={formData.contactEmail}
+                    fieldName="contactEmail"
+                    className={websiteStore.contactInfoStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </p>
                 <p>
-                  <strong>Address:</strong> <EditableText initialText={formData.address || 'Company Address'} fieldName="contactAddress" className={editableTextClasses.contactInfo} onTextChange={handleTextChange} />
+                  <strong>Address:</strong>{" "}
+                  <EditableText
+                    initialText={formData.contactAddress}
+                    fieldName="contactAddress"
+                    className={websiteStore.contactInfoStyle as string}
+                    onTextChange={handleTextChange}
+                    onStyleChange={handleStyleChange}
+                  />
                 </p>
               </div>
             </div>
           )}
-          {contactLayout === 'split' && (
+          {websiteStore.contactLayout === "split" && (
             <div className="grid md:grid-cols-2 gap-8">
               <div>
                 <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
                 <div className="space-y-4">
                   <p>
-                    <strong>Phone:</strong> <EditableText initialText={formData.telephoneNumber || 'Phone Number'} fieldName="contactPhone" className={editableTextClasses.contactInfo} onTextChange={handleTextChange} />
+                    <strong>Phone:</strong>{" "}
+                    <EditableText
+                      initialText={formData.contactPhone}
+                      fieldName="contactPhone"
+                      className={websiteStore.contactInfoStyle as string}
+                      onTextChange={handleTextChange}
+                      onStyleChange={handleStyleChange}
+                    />
                   </p>
                   <p>
-                    <strong>Email:</strong> <EditableText initialText={`info@${(formData.companyName || 'Company Name').toLowerCase().replace(' ', '')}.com`} fieldName="contactEmail" className={editableTextClasses.contactInfo} onTextChange={handleTextChange} />
+                    <strong>Email:</strong>{" "}
+                    <EditableText
+                      initialText={formData.contactEmail}
+                      fieldName="contactEmail"
+                      className={websiteStore.contactInfoStyle as string}
+                      onTextChange={handleTextChange}
+                      onStyleChange={handleStyleChange}
+                    />
                   </p>
                   <p>
-                    <strong>Address:</strong> <EditableText initialText={formData.address || 'Company Address'} fieldName="contactAddress" className={editableTextClasses.contactInfo} onTextChange={handleTextChange} />
+                    <strong>Address:</strong>{" "}
+                    <EditableText
+                      initialText={formData.contactAddress}
+                      fieldName="contactAddress"
+                      className={websiteStore.contactInfoStyle as string}
+                      onTextChange={handleTextChange}
+                      onStyleChange={handleStyleChange}
+                    />
                   </p>
                 </div>
               </div>
@@ -336,10 +526,16 @@ export default function Home({formData}:PageDesignerProps) {
               </div>
             </div>
           )}
-          {contactLayout === 'full-width' && (
+          {websiteStore.contactLayout === "full-width" && (
             <div className="max-w-2xl mx-auto">
-              <p className={editableTextClasses.contactParagraph}>
-                <EditableText initialText="Get in touch with us for all your pumping needs" fieldName="contactParagraph" className={editableTextClasses.contactParagraph} onTextChange={handleTextChange} />
+              <p className={websiteStore.contactParagraphStyle as string}>
+                <EditableText
+                  initialText={formData.contactParagraph}
+                  fieldName="contactParagraph"
+                  className={websiteStore.contactParagraphStyle as string}
+                  onTextChange={handleTextChange}
+                  onStyleChange={handleStyleChange}
+                />
               </p>
               <form className="space-y-4">
                 <input type="text" placeholder="Name" className="w-full p-2 border rounded" />
@@ -355,11 +551,12 @@ export default function Home({formData}:PageDesignerProps) {
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-8">
         <div className="container mx-auto px-4 text-center">
-          <EditableText 
-            initialText={`© ${new Date().getFullYear()} ${formData.companyName || 'Company Name'}. All rights reserved.`} 
-            fieldName="footerText" 
-            className={editableTextClasses.footerText} 
-            onTextChange={handleTextChange} 
+          <EditableText
+            initialText={formData.footerText}
+            fieldName="footerText"
+            className={websiteStore.footerTextStyle as string}
+            onTextChange={handleTextChange}
+            onStyleChange={handleStyleChange}
           />
         </div>
       </footer>
